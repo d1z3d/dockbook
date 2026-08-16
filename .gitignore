@@ -1,0 +1,4 @@
+dist/
+site/
+*.log
+.DS_Store

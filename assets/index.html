@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentation</title>
+<link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/theme.css">
+<script>
+  (function () {
+    var saved = localStorage.getItem('db-theme')
+    var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    document.documentElement.setAttribute('data-theme', theme)
+  })()
+</script>
+</head>
+<body>
+  <header class="db-header">
+    <button class="db-header__menu-btn" id="db-menu-btn" aria-label="Меню">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <a href="/" class="db-header__title" id="db-site-title">Documentation</a>
+    <div class="db-header__spacer"></div>
+    <button class="db-header__search" id="db-search-btn">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="M18 18l-4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span>Поиск</span>
+      <span class="db-search-hint"><kbd id="db-search-kbd">⌘K</kbd></span>
+    </button>
+    <button class="db-theme-toggle" id="db-theme-toggle" aria-label="Переключить тему">
+      <svg id="db-theme-icon" width="16" height="16" viewBox="0 0 20 20" fill="none"></svg>
+    </button>
+  </header>
+
+  <div class="db-sidebar-backdrop" id="db-sidebar-backdrop"></div>
+
+  <div class="db-layout">
+    <nav class="db-sidebar" id="db-sidebar"></nav>
+    <main class="db-main">
+      <article class="db-content" id="db-content"></article>
+      <nav class="db-pager" id="db-pager"></nav>
+      <a class="db-edit-link" id="db-edit-link" hidden></a>
+    </main>
+    <aside class="db-toc" id="db-toc"></aside>
+  </div>
+
+  <div class="db-search-overlay" id="db-search-overlay" hidden>
+    <div class="db-search-box">
+      <input class="db-search-input" id="db-search-input" type="text" placeholder="Поиск по документации…" autocomplete="off">
+      <div class="db-search-results" id="db-search-results"></div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "dockbook",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Локальный генератор документации на чистых HTML/JS/CSS без БД и фреймворков",
+  "bin": {
+    "dockbook": "./bin/dockbook.js"
+  },
+  "scripts": {
+    "dev": "cd example && node ../bin/dockbook.js dev",
+    "build": "cd example && node ../bin/dockbook.js build",
+    "preview": "cd example && node ../bin/dockbook.js preview",
+    "docs:dev": "node bin/dockbook.js dev",
+    "docs:build": "node bin/dockbook.js build",
+    "docs:preview": "node bin/dockbook.js preview"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
