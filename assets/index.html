@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Documentation</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="stylesheet" href="/app.css">
 <link rel="stylesheet" href="/theme.css">
 <script>
@@ -19,8 +20,14 @@
     <button class="db-header__menu-btn" id="db-menu-btn" aria-label="Меню">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
     </button>
-    <a href="/" class="db-header__title" id="db-site-title">Documentation</a>
+    <a href="/" class="db-header__title" id="db-site-title">
+      <img src="/favicon.svg" alt="" class="db-header__logo" width="22" height="22">
+      <span id="db-site-title-text">Documentation</span>
+    </a>
     <div class="db-header__spacer"></div>
+    <button class="db-header__switch" id="db-switch-docs-btn" type="button" aria-label="Открыть другую документацию" title="Открыть другую документацию" hidden>
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M2.5 5.5a1 1 0 011-1h3.6l1.6 1.8h7.3a1 1 0 011 1v7.2a1 1 0 01-1 1H3.5a1 1 0 01-1-1v-9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    </button>
     <button class="db-header__search" id="db-search-btn">
       <svg width="15" height="15" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="M18 18l-4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       <span>Поиск</span>
@@ -34,7 +41,25 @@
   <div class="db-sidebar-backdrop" id="db-sidebar-backdrop"></div>
 
   <div class="db-layout">
-    <nav class="db-sidebar" id="db-sidebar"></nav>
+    <nav class="db-sidebar" id="db-sidebar">
+      <div class="db-sidebar-tools" id="db-sidebar-tools" hidden>
+        <button class="db-sidebar-add" id="db-sidebar-add-btn" type="button" aria-haspopup="true" aria-expanded="false">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span>Добавить</span>
+        </button>
+        <div class="db-menu db-sidebar-add-menu" id="db-sidebar-add-menu" hidden>
+          <button type="button" id="db-new-page-btn">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M5 2.5h6.5L15 6v11.5H5V2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M11.5 2.5V6H15" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            <span>Новая страница</span>
+          </button>
+          <button type="button" id="db-new-folder-btn">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none"><path d="M2.5 5.5a1 1 0 011-1h3.6l1.6 1.8h7.3a1 1 0 011 1v7.2a1 1 0 01-1 1H3.5a1 1 0 01-1-1v-9z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            <span>Новая папка</span>
+          </button>
+        </div>
+      </div>
+      <div id="db-sidebar-tree"></div>
+    </nav>
     <main class="db-main">
       <article class="db-content" id="db-content"></article>
       <nav class="db-pager" id="db-pager"></nav>
@@ -47,6 +72,114 @@
     <div class="db-search-box">
       <input class="db-search-input" id="db-search-input" type="text" placeholder="Поиск по документации…" autocomplete="off">
       <div class="db-search-results" id="db-search-results"></div>
+    </div>
+  </div>
+
+  <div class="db-edit-overlay" id="db-edit-overlay" hidden>
+    <div class="db-edit-box">
+      <div class="db-edit-box__header">
+        <span id="db-edit-path"></span>
+        <div class="db-edit-box__actions">
+          <button class="db-edit-box__btn" id="db-edit-save-btn" type="button">Сохранить</button>
+          <button class="db-edit-box__btn db-edit-box__btn--ghost" id="db-edit-cancel-btn" type="button">Отмена</button>
+        </div>
+      </div>
+      <div class="db-edit-toolbar" id="db-edit-toolbar">
+        <div class="db-edit-toolbar__dropdown">
+          <button type="button" class="db-edit-toolbar__btn" id="db-heading-menu-btn" aria-haspopup="true" aria-expanded="false" title="Заголовок">H ▾</button>
+          <div class="db-menu db-heading-menu" id="db-heading-menu" hidden></div>
+        </div>
+        <span class="db-edit-toolbar__sep"></span>
+        <button type="button" class="db-edit-toolbar__btn db-edit-toolbar__btn--b" data-inline="bold" title="Жирный">B</button>
+        <button type="button" class="db-edit-toolbar__btn db-edit-toolbar__btn--i" data-inline="italic" title="Курсив">I</button>
+        <button type="button" class="db-edit-toolbar__btn db-edit-toolbar__btn--s" data-inline="strike" title="Зачёркнутый">S</button>
+        <button type="button" class="db-edit-toolbar__btn db-edit-toolbar__btn--code" data-inline="code" title="Код">{ }</button>
+        <button type="button" class="db-edit-toolbar__btn" data-inline="link" title="Ссылка">Ссылка</button>
+        <button type="button" class="db-edit-toolbar__btn" data-inline="image" title="Картинка">Картинка</button>
+        <span class="db-edit-toolbar__sep"></span>
+        <div class="db-edit-toolbar__dropdown">
+          <button type="button" class="db-edit-toolbar__btn" id="db-block-menu-btn" aria-haspopup="true" aria-expanded="false">Блок ▾</button>
+          <div class="db-menu db-block-menu" id="db-block-menu" hidden></div>
+        </div>
+        <div class="db-edit-toolbar__dropdown">
+          <button type="button" class="db-edit-toolbar__btn" id="db-page-link-btn" aria-haspopup="true" aria-expanded="false">Страница ▾</button>
+          <div class="db-menu db-page-link-menu" id="db-page-link-menu" hidden>
+            <input type="text" class="db-page-link-search" id="db-page-link-search" placeholder="Поиск страницы…" autocomplete="off">
+            <div class="db-page-link-list" id="db-page-link-list"></div>
+          </div>
+        </div>
+      </div>
+      <div class="db-edit-editor">
+        <pre class="db-edit-highlight" id="db-edit-highlight" aria-hidden="true"><code></code></pre>
+        <textarea class="db-edit-textarea" id="db-edit-textarea" spellcheck="false"></textarea>
+      </div>
+      <div class="db-edit-box__status" id="db-edit-status"></div>
+    </div>
+  </div>
+
+  <div class="db-prompt-overlay" id="db-prompt-overlay" hidden>
+    <form class="db-prompt-box" id="db-prompt-form">
+      <div class="db-prompt-box__title" id="db-prompt-title"></div>
+      <label class="db-prompt-box__field" id="db-prompt-field-title" hidden>
+        <span>Заголовок страницы</span>
+        <input type="text" id="db-prompt-title-input" autocomplete="off">
+      </label>
+      <label class="db-prompt-box__field" id="db-prompt-field-entry" hidden>
+        <span>Раздел документации</span>
+        <select id="db-prompt-entry-select"></select>
+      </label>
+      <label class="db-prompt-box__field">
+        <span id="db-prompt-path-label">Путь</span>
+        <input type="text" id="db-prompt-path-input" autocomplete="off" required>
+      </label>
+      <div class="db-prompt-box__hint" id="db-prompt-hint"></div>
+      <div class="db-prompt-box__actions">
+        <button class="db-edit-box__btn" type="submit">Создать</button>
+        <button class="db-edit-box__btn db-edit-box__btn--ghost" type="button" id="db-prompt-cancel-btn">Отмена</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="db-prompt-overlay" id="db-folder-title-overlay" hidden>
+    <form class="db-prompt-box" id="db-folder-title-form">
+      <div class="db-prompt-box__title" id="db-folder-title-heading">Название раздела</div>
+      <label class="db-prompt-box__field">
+        <span>Отображаемое название</span>
+        <input type="text" id="db-folder-title-input" autocomplete="off">
+      </label>
+      <div class="db-prompt-box__hint" id="db-folder-title-hint">Если оставить пустым — будет использовано имя папки на диске.</div>
+      <div class="db-prompt-box__actions">
+        <button class="db-edit-box__btn" type="submit">Сохранить</button>
+        <button class="db-edit-box__btn db-edit-box__btn--ghost" type="button" id="db-folder-title-cancel-btn">Отмена</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="db-prompt-overlay" id="db-switch-overlay" hidden>
+    <div class="db-browse-box">
+      <div class="db-browse-box__header">
+        <div class="db-browse-box__title">Другая документация</div>
+        <button class="db-browse-box__close" id="db-switch-close-btn" type="button" aria-label="Закрыть">×</button>
+      </div>
+
+      <div class="db-browse-box__path-row">
+        <button class="db-browse-box__nav-btn" id="db-switch-up-btn" type="button" title="Наверх">↑ Наверх</button>
+        <button class="db-browse-box__nav-btn" id="db-switch-home-btn" type="button" title="Домашняя папка">⌂ Домой</button>
+      </div>
+      <form class="db-browse-box__path-row" id="db-switch-path-form">
+        <input class="db-browse-box__path-input" id="db-switch-path-input" type="text" autocomplete="off" spellcheck="false" placeholder="/путь/до/другой/документации">
+        <button class="db-edit-box__btn db-edit-box__btn--ghost" type="submit">Перейти</button>
+      </form>
+
+      <div class="db-browse-box__list" id="db-switch-list"></div>
+
+      <div class="db-browse-box__footer">
+        <div class="db-browse-box__hint" id="db-switch-hint"></div>
+        <div class="db-browse-box__actions">
+          <button class="db-edit-box__btn db-edit-box__btn--ghost" id="db-switch-cancel-btn" type="button">Отмена</button>
+          <button class="db-edit-box__btn" id="db-switch-choose-btn" type="button">Открыть эту папку</button>
+        </div>
+      </div>
     </div>
   </div>
 

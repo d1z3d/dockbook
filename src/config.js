@@ -11,6 +11,7 @@ const DEFAULTS = {
   content: [],
   openapi: [],
   edit: null,
+  localEdit: true,
   theme: {}
 }
 

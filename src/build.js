@@ -47,22 +47,28 @@ function stripHtml (html) {
     .trim()
 }
 
-// Рекурсивно обходит content-папку, возвращает { pages: [], navNode }
-function scanContentDir (dir, base, ctx) {
+// Рекурсивно обходит content-папку, возвращает { pages: [], navNode }.
+// relDir — путь папки относительно корня content-раздела (для адресации
+// .navigation.yml через API редактирования), entryIndex — индекс этого
+// content-раздела в config.content.
+function scanContentDir (dir, base, relDir, entryIndex, ctx) {
   const { files, navMeta } = walk(dir)
   const node = { title: navMeta.title || null, order: navMeta.order || null, items: [] }
 
   for (const entry of files) {
     if (entry.type === 'dir') {
       const childBase = `${base === '/' ? '' : base}/${entry.name}`.replace(/\/+/g, '/')
-      const child = scanContentDir(entry.full, childBase, ctx)
+      const childRelDir = relDir ? `${relDir}/${entry.name}` : entry.name
+      const child = scanContentDir(entry.full, childBase, childRelDir, entryIndex, ctx)
       if (child.node.items.length || child.node.page) {
         node.items.push({
           kind: 'section',
           title: child.node.title || prettify(entry.name),
           order: child.node.order,
           children: child.node.items,
-          route: child.node.indexRoute || null
+          route: child.node.indexRoute || null,
+          entry: entryIndex,
+          path: childRelDir
         })
       }
       continue
@@ -88,6 +94,7 @@ function scanContentDir (dir, base, ctx) {
     const isIndex = /^index\.(md|mdx)$/i.test(entry.name)
     if (isIndex) {
       node.indexRoute = route
+      node.indexPageTitle = title
       node.title = node.title || title
     } else {
       node.items.push({ kind: 'page', title, order: data.order, route })
@@ -124,17 +131,24 @@ function build (config) {
   const pages = []
   const navSections = []
 
-  for (const contentEntry of config.content) {
+  config.content.forEach((contentEntry, entryIndex) => {
     const ctx = { pages, rootContentDir: contentEntry.dir }
-    const { node } = scanContentDir(contentEntry.dir, contentEntry.base, ctx)
+    const { node } = scanContentDir(contentEntry.dir, contentEntry.base, '', entryIndex, ctx)
+    // Для корня content-раздела название берём с приоритетом от самой
+    // главной страницы (index.md), а не от .navigation.yml — в отличие от
+    // вложенных папок, корень в сайдбаре отображается как страница, а не
+    // как папка (см. renderRootTitle в assets/app.js), поэтому и
+    // переименование должно попадать туда же, откуда берётся название.
     navSections.push({
       kind: 'section',
-      title: contentEntry.label || node.title || 'Docs',
+      title: contentEntry.label || (node.indexRoute ? node.indexPageTitle : node.title) || 'Docs',
       route: node.indexRoute || null,
       order: null,
+      entry: entryIndex,
+      path: '',
       children: node.items
     })
-  }
+  })
 
   for (const entry of config.openapi) {
     const { pages: apiPages, navChildren } = buildOpenApiPages(entry, '')

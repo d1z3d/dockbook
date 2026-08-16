@@ -1,7 +1,7 @@
 ---
 title: Markdown-блоки
 description: Hint, Tabs, Steps, Accordion, Cards, Code Group, таблицы, Mermaid
-order: 4
+order: 5
 ---
 
 # Markdown-блоки
@@ -279,3 +279,9 @@ note over User,Server: пример plantuml
 Стандартно: `**жирный**`, `*курсив*`, `~~зачёркнутый~~`, `` `код` ``,
 `[ссылка](/path)`, `![картинка](/img.png)`. Внешние ссылки (`http(s)://`)
 автоматически получают `target="_blank" rel="noopener noreferrer"`.
+
+## Экспорт без блоков
+
+Если нужен обычный markdown без этого синтаксиса (например, для загрузки
+в Confluence) — команда [`export-md`](/guide/export-md) разворачивает все
+блоки в чистый markdown прямо при сборке.

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dockbook</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/welcome.css">
+<script>
+  (function () {
+    var saved = localStorage.getItem('db-theme')
+    var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    document.documentElement.setAttribute('data-theme', theme)
+  })()
+</script>
+</head>
+<body>
+  <div class="db-welcome">
+    <div class="db-welcome__box">
+      <div class="db-welcome__logo">Dockbook</div>
+      <p class="db-welcome__subtitle">Локальный инструмент документации без БД и фреймворков</p>
+      <button class="db-welcome__btn" id="db-welcome-pick-btn" type="button">Выбрать папку с документацией</button>
+      <div class="db-welcome__status" id="db-welcome-status"></div>
+    </div>
+  </div>
+
+  <div class="db-prompt-overlay" id="db-browse-overlay" hidden>
+    <div class="db-browse-box">
+      <div class="db-browse-box__header">
+        <div class="db-browse-box__title">Папка с документацией</div>
+        <button class="db-browse-box__close" id="db-browse-close-btn" type="button" aria-label="Закрыть">×</button>
+      </div>
+
+      <div class="db-browse-box__path-row">
+        <button class="db-browse-box__nav-btn" id="db-browse-up-btn" type="button" title="Наверх">↑ Наверх</button>
+        <button class="db-browse-box__nav-btn" id="db-browse-home-btn" type="button" title="Домашняя папка">⌂ Домой</button>
+      </div>
+      <form class="db-browse-box__path-row" id="db-browse-path-form">
+        <input class="db-browse-box__path-input" id="db-browse-path-input" type="text" autocomplete="off" spellcheck="false" placeholder="/путь/до/папки/с/документацией">
+        <button class="db-edit-box__btn db-edit-box__btn--ghost" type="submit">Перейти</button>
+      </form>
+
+      <div class="db-browse-box__list" id="db-browse-list"></div>
+
+      <div class="db-browse-box__footer">
+        <div class="db-browse-box__hint" id="db-browse-hint"></div>
+        <div class="db-browse-box__actions">
+          <button class="db-edit-box__btn db-edit-box__btn--ghost" id="db-browse-cancel-btn" type="button">Отмена</button>
+          <button class="db-edit-box__btn" id="db-browse-choose-btn" type="button">Открыть эту папку</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/welcome.js"></script>
+</body>
+</html>

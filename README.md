@@ -42,6 +42,7 @@ npm run docs:dev      # или: node bin/dockbook.js dev — из корня р�
 | `dockbook dev` | Сборка + локальный сервер с live-reload при правке контента/конфига. |
 | `dockbook build` | Разовая статическая сборка в `outDir`. |
 | `dockbook preview` | Сервер над уже собранным `outDir`, без watch. |
+| `dockbook export-md` | Экспорт контента в обычный markdown без блоков dockbook (`::hint`, `::tabs`...) — для Confluence и подобных систем. По умолчанию — в `confluence/`, путь можно передать первым аргументом. |
 
 Каждая запускается из папки с `dockbook.config.js`:
 

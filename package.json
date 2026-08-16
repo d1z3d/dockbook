@@ -12,7 +12,8 @@
     "preview": "cd example && node ../bin/dockbook.js preview",
     "docs:dev": "node bin/dockbook.js dev",
     "docs:build": "node bin/dockbook.js build",
-    "docs:preview": "node bin/dockbook.js preview"
+    "docs:preview": "node bin/dockbook.js preview",
+    "docs:export-md": "node bin/dockbook.js export-md"
   },
   "engines": {
     "node": ">=18"

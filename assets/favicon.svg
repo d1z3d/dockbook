@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <rect x="2" y="2" width="44" height="44" rx="11" fill="#2563EB"/>
+  <!-- dock / tray -->
+  <path d="M10 33h28v3.5A3.5 3.5 0 0 1 34.5 40h-21A3.5 3.5 0 0 1 10 36.5z" fill="#BFDBFE"/>
+  <path d="M14 33v-2h20v2" stroke="#93C5FD" stroke-width="2" stroke-linecap="round"/>
+  <!-- open book -->
+  <path d="M12.5 12.2c4-1.4 7.8-.9 11.5 1.4v16.8c-3.4-2-7.2-2.5-11.5-1.3z" fill="white"/>
+  <path d="M35.5 12.2c-4-1.4-7.8-.9-11.5 1.4v16.8c3.4-2 7.2-2.5 11.5-1.3z" fill="white"/>
+  <path d="M24 13.6v16.8" stroke="#2563EB" stroke-width="2" stroke-linecap="round"/>
+  <!-- subtle page lines -->
+  <path d="M15.5 17.5h5.2M15.5 21h5.2M27.3 17.5h5.2M27.3 21h5.2" stroke="#BFDBFE" stroke-width="1.7" stroke-linecap="round"/>
+</svg>

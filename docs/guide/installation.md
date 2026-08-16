@@ -32,6 +32,9 @@ node bin/dockbook.js build
 ```bash [preview]
 node bin/dockbook.js preview
 ```
+```bash [export-md]
+node bin/dockbook.js export-md
+```
 ::
 
 | Команда | Что делает |
@@ -39,9 +42,17 @@ node bin/dockbook.js preview
 | `dev` | Собирает сайт, поднимает локальный сервер и следит за папками из `content`, конфигом и OpenAPI-спеками. При изменении файла — пересборка и live-reload страницы (через SSE). |
 | `build` | Разовая сборка статического сайта в `outDir` (по умолчанию `dist`). |
 | `preview` | Раздаёт уже собранный `outDir` локальным сервером, без слежения за файлами — то, что реально попадёт «в раздачу». |
+| `export-md` | Разовый экспорт контента в обычный markdown (без `::hint`/`::tabs`/...) — для Confluence и подобных систем. Подробнее — [«Экспорт в Confluence»](/guide/export-md). |
 
 Сервер во всех трёх случаях слушает только `127.0.0.1` — сайт недоступен по
 сети, только с этой машины.
+
+::hint{type="info"}
+Если в текущей папке ещё нет `dockbook.config.js`, `dev` не упадёт с
+ошибкой — вместо этого откроется приветственный экран с выбором папки
+документации прямо в браузере, а конфиг создастся автоматически. Подробнее
+— [«Редактирование в браузере»](/guide/editing#первый-запуск-без-конфига).
+::
 
 ## Через package.json
 
@@ -52,7 +63,8 @@ node bin/dockbook.js preview
   "scripts": {
     "docs:dev": "node bin/dockbook.js dev",
     "docs:build": "node bin/dockbook.js build",
-    "docs:preview": "node bin/dockbook.js preview"
+    "docs:preview": "node bin/dockbook.js preview",
+    "docs:export-md": "node bin/dockbook.js export-md"
   }
 }
 ```

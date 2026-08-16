@@ -3,6 +3,7 @@
 const http = require('http')
 const fs = require('fs')
 const path = require('path')
+const { handleEditRequest } = require('./editApi')
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -16,11 +17,17 @@ const MIME = {
   '.woff2': 'font/woff2'
 }
 
-function createServer (outDir, { liveReload = false } = {}) {
+function createServer (outDir, { liveReload = false, edit = null } = {}) {
   const sseClients = new Set()
 
   const server = http.createServer((req, res) => {
     const parsed = new URL(req.url, 'http://localhost')
+
+    const editEnabled = edit && (typeof edit.enabled === 'function' ? edit.enabled() : edit.enabled !== false)
+    if (editEnabled) {
+      const entries = typeof edit.entries === 'function' ? edit.entries() : edit.entries
+      if (handleEditRequest(req, res, parsed, { entries, switchDocs: edit.switchDocs })) return
+    }
 
     if (liveReload && parsed.pathname === '/__dockbook_events') {
       res.writeHead(200, {
@@ -86,4 +93,4 @@ function createServer (outDir, { liveReload = false } = {}) {
   return server
 }
 
-module.exports = { createServer }
+module.exports = { createServer, MIME }

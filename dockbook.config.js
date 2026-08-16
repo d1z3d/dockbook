@@ -5,6 +5,7 @@ module.exports = {
   description: 'Локальный генератор документации без БД и фреймворков',
   port: 4100,
   outDir: 'site',
+  localEdit: false,
 
   content: [
     { dir: './docs', base: '/' }

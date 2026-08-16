@@ -1,9 +1,9 @@
 ---
 title: Главная
-description: Демо-проект dockbook
+description: О проекте
 ---
 
-# dockbook
+# Dockbook
 
 Самостоятельный аналог GitBook: markdown в git, богатые блоки, мгновенный поиск, API-reference.
 
@@ -15,3 +15,17 @@ description: Демо-проект dockbook
 
 - [Быстрый старт](/guide/setup)
 - [Витрина блоков](/showcase)
+
+## Предупреждение
+
+::hint{type="warning"}
+Пробный текст
+::
+[Описание какой-то страницы](/guide/setup)
+`{ "same": 1 }`
+
+```json
+{
+  "same": 1
+}
+```

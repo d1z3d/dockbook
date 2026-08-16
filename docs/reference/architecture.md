@@ -8,20 +8,27 @@ order: 3
 
 ```
 dockbook/
-  bin/dockbook.js      # CLI: dev / build / preview
+  bin/dockbook.js      # CLI: dev / build / preview / export-md + мастер первого запуска
   src/
     yaml.js             # свой YAML-парсер (frontmatter, .navigation.yml, openapi.yaml)
     markdown.js          # свой markdown-парсер + кастомные блоки
     openapi.js            # генерация страниц из OpenAPI-спецификации
     config.js              # загрузка и валидация dockbook.config.js
     build.js                 # сканирование папок, сборка навигации/поиска/страниц
+    mdExport.js               # export-md: развёртывание кастомных блоков в чистый markdown
     server.js                 # локальный http-сервер + live-reload (SSE)
-  assets/                      # фронтенд, который раздаётся пользователю
+    httpJson.js                # общие JSON-хелперы для http-обработчиков
+    editApi.js                  # API редактирования в браузере (localEdit)
+    setupApi.js                  # обзор файловой системы для мастера первого запуска
+  assets/                        # фронтенд, который раздаётся пользователю
     index.html
     app.css
     app.js
-  docs/                         # то, что вы сейчас читаете
-  example/                       # демо-проект с примерами всех блоков
+    welcome.html                 # приветственный экран (нет dockbook.config.js)
+    welcome.css
+    welcome.js
+  docs/                           # то, что вы сейчас читаете
+  example/                         # демо-проект с примерами всех блоков
 ```
 
 ## Почему без зависимостей
@@ -66,3 +73,60 @@ OpenAPI-спецификаций (`fs.watch`), а браузеру через `E
 подставляется готовый HTML нужного маршрута, перестраивается оглавление,
 подсвечивается активный пункт сайдбара. `data/search.json` подгружается
 отдельно и лениво — только при первом открытии поиска.
+
+## Редактирование в браузере (`localEdit`)
+
+Пользовательская сторона описана в
+[«Редактирование в браузере»](/guide/editing), здесь — как это устроено.
+
+`src/server.js` перед обычной раздачей файлов из `outDir` проверяет пути
+вида `/__dockbook_api/*` и, если `localEdit` включён, отдаёт их
+`src/editApi.js`:
+
+- `GET /__dockbook_api/status` — есть ли редактирование и список
+  content-разделов (для выбора, если их несколько);
+- `GET /__dockbook_api/resolve?route=...` — находит исходный `.md`/`.mdx`
+  файл для маршрута страницы (перебором кандидатов: `route.md`,
+  `route/index.md` и т.д. по всем content-разделам);
+- `PUT /__dockbook_api/source` — перезаписывает файл целиком;
+- `POST /__dockbook_api/page` / `POST /__dockbook_api/folder` — создают
+  файл (со стартовым frontmatter) или папку, с автосозданием
+  промежуточных директорий;
+- `PUT /__dockbook_api/folder-title` — читает `.navigation.yml` папки (если
+  есть), обновляет поле `title`, сериализует обратно минимальным
+  YAML-дампером (только плоские скаляры — `title`/`order`, этого
+  достаточно для формата `.navigation.yml`).
+
+Все пути проверяются на выход за пределы content-папки (`safeJoin` в
+`editApi.js`) — записать файл можно только внутри сконфигурированных
+`content`-разделов. Любая правка через API — это обычная запись на диск,
+поэтому дальше её подхватывает тот же `fs.watch`, что и ручные правки в
+редакторе: пересборка и `broadcastReload()` через уже открытый SSE-канал.
+
+## Экспорт в чистый markdown (`export-md`)
+
+Отдельный путь, независимый от `build.js`/`renderMarkdown` — `src/mdExport.js`
+работает не с HTML, а с самим markdown-текстом. Он переиспользует
+низкоуровневые помощники `src/markdown.js` (`Lines`, `parseBlockAttrs`,
+`collectRawUntilClose`, `splitTopLevelSubBlocks`, `consumeFence`), которыми
+парсер размечает кастомные блоки, но вместо HTML-рендера каждый блок
+(`::hint`, `::tabs`, `::code-group`, `::steps`, `::accordion`, `::cards`,
+`::mermaid`/`::plantuml`) разворачивается в обычный markdown (цитаты,
+заголовки, жирный текст, код-фенсы) — подробности того, во что превращается
+каждый блок, на странице [«Экспорт в Confluence»](/guide/export-md).
+Frontmatter вырезается, обходятся те же content-папки, что и при `build`,
+не-md файлы копируются как есть.
+
+## Мастер первого запуска
+
+Если `bin/dockbook.js` не находит `dockbook.config.js` в текущей папке,
+команда `dev` не завершается ошибкой, а поднимает временный http-сервер на
+том же порту: раздаёт `assets/welcome.html` и обрабатывает
+`GET /__dockbook_api/browse` (обзор файловой системы через
+`src/setupApi.js`, стартует с домашней папки пользователя) и
+`POST /__dockbook_api/init`.
+
+После выбора папки `init` пишет `dockbook.config.js` (с путём, посчитанным
+относительно текущей папки через `fs.realpathSync`, чтобы не ломаться на
+симлинках), закрывает временный сервер и запускает обычный `dev` на том же
+порту — браузер сам дожидается ответа `/` и переходит на собранный сайт.

@@ -1,0 +1,41 @@
+.db-welcome {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.db-welcome__box {
+  width: min(480px, 100%);
+  text-align: center;
+}
+.db-welcome__logo {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--db-accent);
+  margin-bottom: 12px;
+}
+.db-welcome__subtitle {
+  color: var(--db-fg-muted);
+  font-size: 15px;
+  margin: 0 0 32px;
+}
+.db-welcome__btn {
+  background: var(--db-accent);
+  color: var(--db-accent-fg);
+  border: none;
+  border-radius: var(--db-radius);
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.db-welcome__btn:hover { opacity: 0.92; }
+.db-welcome__status {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--db-fg-muted);
+  min-height: 18px;
+}
+.db-welcome__status--error { color: #d64545; }
