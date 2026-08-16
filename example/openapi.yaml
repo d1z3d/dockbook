@@ -1,0 +1,70 @@
+openapi: 3.0.3
+info:
+  title: Example API
+  version: 1.0.0
+  description: Демонстрационный API для dockbook
+paths:
+  /books:
+    get:
+      operationId: listBooks
+      summary: Список книг
+      description: Возвращает список книг с пагинацией.
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Максимальное количество результатов
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              example:
+                items:
+                  - id: 1
+                    title: Clean Code
+    post:
+      operationId: createBook
+      summary: Создать книгу
+      description: Добавляет новую книгу в каталог.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+            example:
+              title: Refactoring
+      responses:
+        '201':
+          description: Книга создана
+          content:
+            application/json:
+              example:
+                id: 2
+                title: Refactoring
+  /books/{id}:
+    get:
+      operationId: getBook
+      summary: Получить книгу по id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор книги
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              example:
+                id: 1
+                title: Clean Code
+        '404':
+          description: Книга не найдена

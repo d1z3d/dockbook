@@ -1,0 +1,7 @@
+:root {
+  --db-accent: #3559e0;
+}
+
+[data-theme='dark'] {
+  --db-accent: #7b93ff;
+}
