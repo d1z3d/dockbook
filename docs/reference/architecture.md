@@ -10,7 +10,8 @@ order: 3
 dockbook/
   bin/dockbook.js      # CLI: dev / build / preview / export-md + мастер первого запуска
   src/
-    yaml.js             # свой YAML-парсер (frontmatter, .navigation.yml, openapi.yaml)
+    yaml.js             # свой YAML-парсер (frontmatter, openapi.yaml)
+    navConfig.js         # чтение/запись dockbook.config.json (title/order папок)
     markdown.js          # свой markdown-парсер + кастомные блоки
     openapi.js            # генерация страниц из OpenAPI-спецификации
     config.js              # загрузка и валидация dockbook.config.js
@@ -51,9 +52,10 @@ dockbook/
 
 1. `src/config.js` загружает `dockbook.config.js`, проверяет, что все
    папки из `content` существуют.
-2. `src/build.js` рекурсивно обходит каждую content-папку: читает
-   `.navigation.yml`, для каждого `.md`/`.mdx` парсит frontmatter и тело
-   через `src/markdown.js`, строит маршрут из пути к файлу.
+2. `src/build.js` рекурсивно обходит каждую content-папку: заголовок/порядок
+   каждой подпапки берёт из `dockbook.config.json` (`src/navConfig.js`), для
+   каждого `.md`/`.mdx` парсит frontmatter и тело через `src/markdown.js`,
+   строит маршрут из пути к файлу.
 3. Для каждой записи `openapi` — `src/openapi.js` читает и парсит YAML,
    резолвит `$ref`, генерирует HTML-страницы по операциям.
 4. Всё собранное — дерево навигации, HTML-страницы по маршрутам, плоский
@@ -92,16 +94,21 @@ OpenAPI-спецификаций (`fs.watch`), а браузеру через `E
 - `POST /__dockbook_api/page` / `POST /__dockbook_api/folder` — создают
   файл (со стартовым frontmatter) или папку, с автосозданием
   промежуточных директорий;
-- `PUT /__dockbook_api/folder-title` — читает `.navigation.yml` папки (если
-  есть), обновляет поле `title`, сериализует обратно минимальным
-  YAML-дампером (только плоские скаляры — `title`/`order`, этого
-  достаточно для формата `.navigation.yml`).
+- `PUT /__dockbook_api/folder-title` — обновляет поле `title` записи папки в
+  `dockbook.config.json` (`src/navConfig.js`), не трогая `order` и записи
+  других папок; пустой `title` убирает запись целиком, если больше нечего
+  хранить.
 
-Все пути проверяются на выход за пределы content-папки (`safeJoin` в
-`editApi.js`) — записать файл можно только внутри сконфигурированных
-`content`-разделов. Любая правка через API — это обычная запись на диск,
-поэтому дальше её подхватывает тот же `fs.watch`, что и ручные правки в
-редакторе: пересборка и `broadcastReload()` через уже открытый SSE-канал.
+Пути к `.md`/`.mdx`-файлам и папкам проверяются на выход за пределы
+content-папки (`safeJoin` в `editApi.js`) — записать файл можно только
+внутри сконфигурированных `content`-разделов. Правка страницы/папки
+контента — обычная запись на диск, поэтому дальше её подхватывает тот же
+`fs.watch`, что и ручные правки в редакторе: пересборка и
+`broadcastReload()` через уже открытый SSE-канал. `dockbook.config.json`
+лежит вне content-папок (рядом с `dockbook.config.js`), поэтому за ним
+следит отдельный `fs.watch` на папку конфига в `bin/dockbook.js`; после
+`PUT /__dockbook_api/folder-title` пересборка также запускается сразу,
+без ожидания события файловой системы.
 
 ## Экспорт в чистый markdown (`export-md`)
 

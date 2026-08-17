@@ -5,6 +5,7 @@ const http = require('http')
 const path = require('path')
 const fs = require('fs')
 const { loadConfig, DEFAULTS } = require('../src/config')
+const { FILE_NAME: NAV_CONFIG_FILE } = require('../src/navConfig')
 const { build, writeOutput } = require('../src/build')
 const { exportContent } = require('../src/mdExport')
 const { createServer, MIME } = require('../src/server')
@@ -143,7 +144,13 @@ function cmdDev (cwd) {
     cmdDevSetup(cwd)
     return
   }
-  let config = loadConfig(configPath)
+  let config
+  try {
+    config = loadConfig(configPath)
+  } catch (err) {
+    console.error(`dockbook: ошибка конфига — ${err.message}`)
+    process.exit(1)
+  }
   let data
 
   // «Другая документация»: временная (только в памяти этого процесса,
@@ -166,6 +173,8 @@ function cmdDev (cwd) {
     edit: {
       enabled: () => config.localEdit !== false,
       entries: () => effectiveConfig().content,
+      configRoot: () => config.root,
+      onFolderTitleChange: () => rebuild(),
       switchDocs: dir => {
         override = { content: [{ dir, base: '/', label: null }] }
         watchDir(dir)
@@ -216,6 +225,13 @@ function cmdDev (cwd) {
     configMtime = mtime
     rebuild()
   })
+  // dockbook.config.json (заголовки/порядок папок) может лежать вне
+  // watch-ируемых content-папок, и его ещё может не существовать при
+  // старте — следим за самой папкой конфига, а не за файлом.
+  fs.watch(config.root, (event, filename) => {
+    if (filename === NAV_CONFIG_FILE) rebuild()
+  })
+
   for (const entry of config.content) watchDir(entry.dir)
   for (const entry of config.openapi) fs.watch(entry.spec, rebuild)
 }

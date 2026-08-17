@@ -8,8 +8,8 @@
 const fs = require('fs')
 const path = require('path')
 const { readJsonBody, sendJson } = require('./httpJson')
-const { parseYAML } = require('./yaml')
 const { listDir, isDirectory } = require('./setupApi')
+const { setFolderTitle } = require('./navConfig')
 
 function safeJoin (rootDir, relPath) {
   if (typeof relPath !== 'string' || !relPath) return null
@@ -35,18 +35,6 @@ function dumpScalar (value) {
   if (typeof value === 'number' || typeof value === 'boolean') return String(value)
   const str = String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')
   return `"${str}"`
-}
-
-// Простой YAML-сериализатор для .navigation.yml: только плоские скаляры
-// (title, order), которые единственные там используются.
-function dumpNavYaml (obj) {
-  const lines = Object.keys(obj).reduce((acc, key) => {
-    const value = obj[key]
-    if (value === null || value === undefined || value === '') return acc
-    acc.push(`${key}: ${dumpScalar(value)}`)
-    return acc
-  }, [])
-  return lines.length ? lines.join('\n') + '\n' : ''
 }
 
 // Точечно меняет (добавляет/убирает) поле title во frontmatter markdown-файла,
@@ -121,7 +109,7 @@ function resolveRoute (entries, route) {
 // папку документации в памяти процесса, см. bin/dockbook.js.
 function handleEditRequest (req, res, parsed, ctx) {
   if (!parsed.pathname.startsWith('/__dockbook_api/')) return false
-  const { entries, switchDocs } = ctx
+  const { entries, switchDocs, configRoot, onFolderTitleChange } = ctx
 
   if (req.method === 'GET' && parsed.pathname === '/__dockbook_api/browse') {
     sendJson(res, 200, listDir(parsed.searchParams.get('path')))
@@ -212,20 +200,11 @@ function handleEditRequest (req, res, parsed, ctx) {
         sendJson(res, 400, { error: 'bad_path' })
         return
       }
-      const ymlPath = path.join(dir, '.navigation.yml')
-      let meta = {}
-      if (fs.existsSync(ymlPath)) {
-        try { meta = parseYAML(fs.readFileSync(ymlPath, 'utf8')) || {} } catch (err) { meta = {} }
-      }
+      const root = typeof configRoot === 'function' ? configRoot() : configRoot
+      if (!root) { sendJson(res, 500, { error: 'not_supported' }); return }
       const title = String(body.title || '').trim()
-      if (title) meta.title = title
-      else delete meta.title
-
-      if (Object.keys(meta).length === 0) {
-        if (fs.existsSync(ymlPath)) fs.unlinkSync(ymlPath)
-      } else {
-        fs.writeFileSync(ymlPath, dumpNavYaml(meta), 'utf8')
-      }
+      setFolderTitle(root, entry.base, body.path, title)
+      if (typeof onFolderTitleChange === 'function') onFolderTitleChange()
       sendJson(res, 200, { ok: true, title: title || null })
     }).catch(() => sendJson(res, 400, { error: 'bad_request' }))
     return true

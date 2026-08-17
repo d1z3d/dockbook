@@ -7,9 +7,10 @@
     "dockbook": "./bin/dockbook.js"
   },
   "scripts": {
-    "dev": "cd example && node ../bin/dockbook.js dev",
-    "build": "cd example && node ../bin/dockbook.js build",
-    "preview": "cd example && node ../bin/dockbook.js preview",
+    "dev": "test -d example && (cd example && node ../bin/dockbook.js dev) || node bin/dockbook.js dev",
+    "build": "test -d example && (cd example && node ../bin/dockbook.js build) || node bin/dockbook.js build",
+    "preview": "test -d example && (cd example && node ../bin/dockbook.js preview) || node bin/dockbook.js preview",
+    "dev:welcome": "rm -rf .dockbook-scratch && mkdir .dockbook-scratch && cd .dockbook-scratch && node ../bin/dockbook.js dev",
     "docs:dev": "node bin/dockbook.js dev",
     "docs:build": "node bin/dockbook.js build",
     "docs:preview": "node bin/dockbook.js preview",

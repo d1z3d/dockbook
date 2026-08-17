@@ -26,7 +26,12 @@ function createServer (outDir, { liveReload = false, edit = null } = {}) {
     const editEnabled = edit && (typeof edit.enabled === 'function' ? edit.enabled() : edit.enabled !== false)
     if (editEnabled) {
       const entries = typeof edit.entries === 'function' ? edit.entries() : edit.entries
-      if (handleEditRequest(req, res, parsed, { entries, switchDocs: edit.switchDocs })) return
+      if (handleEditRequest(req, res, parsed, {
+        entries,
+        switchDocs: edit.switchDocs,
+        configRoot: edit.configRoot,
+        onFolderTitleChange: edit.onFolderTitleChange
+      })) return
     }
 
     if (liveReload && parsed.pathname === '/__dockbook_events') {

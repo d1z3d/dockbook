@@ -50,6 +50,6 @@ OpenAPI. Внешний вид и поведение — как у GitBook, но
 
 ### Написать контент
 См. [«Контент и markdown-блоки»](/guide/content) и
-[«Markdown-блоки»](/guide/blocks) — frontmatter, `.navigation.yml`,
+[«Markdown-блоки»](/guide/blocks) — frontmatter, `dockbook.config.json`,
 `::hint`, `::tabs`, `::steps` и другие блоки.
 ::

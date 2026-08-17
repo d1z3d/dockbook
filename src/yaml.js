@@ -1,7 +1,7 @@
 'use strict'
 
-// Минимальный парсер YAML-подмножества, достаточного для frontmatter,
-// .navigation.yml и openapi.yaml (блочные map/seq, flow-списки/объекты,
+// Минимальный парсер YAML-подмножества, достаточного для frontmatter
+// и openapi.yaml (блочные map/seq, flow-списки/объекты,
 // кавычки, block-скаляры | и >). Без внешних зависимостей и сети.
 
 function stripComment (line) {

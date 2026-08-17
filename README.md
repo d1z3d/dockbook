@@ -19,8 +19,9 @@ dockbook/
 ## Быстрый старт
 
 ```bash
-npm run dev       # example/ — демо со всеми блоками, http://localhost:4000
-npm run docs:dev  # полная документация dockbook, http://localhost:4100
+npm run dev           # example/ — демо со всеми блоками, http://localhost:4000
+npm run docs:dev      # полная документация dockbook, http://localhost:4100
+npm run dev:welcome   # мастер выбора папки с нуля (без конфига), http://localhost:4000
 ```
 
 ## Документация
@@ -76,7 +77,7 @@ dockbook не публикуется в npm и не ставится через 
 
 3. Создать `docs/` с markdown-файлами (по образцу `example/docs`):
    `docs/index.md` — стартовая страница, дальше — произвольные разделы;
-   опционально `docs/.navigation.yml` для заголовка/порядка раздела в
+   опционально `dockbook.config.json` для заголовка/порядка папки в
    сайдбаре (без него сайдбар строится по структуре папок автоматически).
 4. Запустить из папки с конфигом:
 

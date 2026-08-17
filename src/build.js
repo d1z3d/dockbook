@@ -3,18 +3,12 @@
 const fs = require('fs')
 const path = require('path')
 const { renderMarkdown, extractFrontmatter, slugify } = require('./markdown')
-const { parseYAML } = require('./yaml')
 const { buildOpenApiPages } = require('./openapi')
+const { loadNavConfig, getFolderMeta } = require('./navConfig')
 
-function walk (dir, base) {
+function walk (dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true })
   const files = []
-  let navMeta = {}
-  for (const e of entries) {
-    if (e.name === '.navigation.yml') {
-      navMeta = parseYAML(fs.readFileSync(path.join(dir, e.name), 'utf8')) || {}
-    }
-  }
   for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
     if (e.name.startsWith('.')) continue
     const full = path.join(dir, e.name)
@@ -24,7 +18,7 @@ function walk (dir, base) {
       files.push({ type: 'file', full, name: e.name })
     }
   }
-  return { files, navMeta }
+  return files
 }
 
 function routeFromFile (relPath, base) {
@@ -48,18 +42,20 @@ function stripHtml (html) {
 }
 
 // Рекурсивно обходит content-папку, возвращает { pages: [], navNode }.
-// relDir — путь папки относительно корня content-раздела (для адресации
-// .navigation.yml через API редактирования), entryIndex — индекс этого
-// content-раздела в config.content.
-function scanContentDir (dir, base, relDir, entryIndex, ctx) {
-  const { files, navMeta } = walk(dir)
+// relDir — путь папки относительно корня content-раздела (используется как
+// ключ в dockbook.config.json для заголовка/порядка папки), entryIndex —
+// индекс этого content-раздела в config.content, entryBase — его base
+// (стабильный ключ раздела, не зависящий от переименований).
+function scanContentDir (dir, base, relDir, entryIndex, ctx, navConfig, entryBase) {
+  const files = walk(dir)
+  const navMeta = getFolderMeta(navConfig, entryBase, relDir)
   const node = { title: navMeta.title || null, order: navMeta.order || null, items: [] }
 
   for (const entry of files) {
     if (entry.type === 'dir') {
       const childBase = `${base === '/' ? '' : base}/${entry.name}`.replace(/\/+/g, '/')
       const childRelDir = relDir ? `${relDir}/${entry.name}` : entry.name
-      const child = scanContentDir(entry.full, childBase, childRelDir, entryIndex, ctx)
+      const child = scanContentDir(entry.full, childBase, childRelDir, entryIndex, ctx, navConfig, entryBase)
       if (child.node.items.length || child.node.page) {
         node.items.push({
           kind: 'section',
@@ -130,12 +126,13 @@ function flattenNavForPager (items, acc = []) {
 function build (config) {
   const pages = []
   const navSections = []
+  const navConfig = loadNavConfig(config.root)
 
   config.content.forEach((contentEntry, entryIndex) => {
     const ctx = { pages, rootContentDir: contentEntry.dir }
-    const { node } = scanContentDir(contentEntry.dir, contentEntry.base, '', entryIndex, ctx)
+    const { node } = scanContentDir(contentEntry.dir, contentEntry.base, '', entryIndex, ctx, navConfig, contentEntry.base)
     // Для корня content-раздела название берём с приоритетом от самой
-    // главной страницы (index.md), а не от .navigation.yml — в отличие от
+    // главной страницы (index.md), а не из dockbook.config.json — в отличие от
     // вложенных папок, корень в сайдбаре отображается как страница, а не
     // как папка (см. renderRootTitle в assets/app.js), поэтому и
     // переименование должно попадать туда же, откуда берётся название.

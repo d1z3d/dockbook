@@ -924,18 +924,22 @@
     return wrap
   }
 
-  // Корень content-раздела (entry задан, path пустой) — это не «папка», а
-  // сама главная страница раздела (index.md), если она есть: показываем её
-  // как обычную страницу (значок файла, переименование через frontmatter),
-  // а не как раздел с значком папки, который сбивает с толку на самом верху
-  // дерева. Настоящие вложенные папки (в т.ч. без index.md, и openapi-раздел)
-  // по-прежнему рендерятся как разделы через renderSectionTitle.
+  // Корень content-раздела (entry задан, path пустой) — не обычная папка:
+  // она не сворачивается и не может быть скрыта (нет шеврона) и рендерится
+  // отдельно от своих детей, а не как элемент общего списка наравне с
+  // файлами. Если есть index.md — показываем её как страницу (значок файла,
+  // переименование через frontmatter). Если index.md нет — у корня нет
+  // собственной страницы и не о чем показывать заголовок: рендерим только
+  // список детей без заголовка-обёртки (без фиктивной папки вроде «Docs»),
+  // они и оказываются на самом верху сайдбара. Настоящие вложенные папки
+  // (и openapi-раздел) по-прежнему рендерятся как обычные сворачиваемые
+  // разделы через renderSectionTitle.
   function isContentRoot (section) {
     return section.entry !== undefined && section.entry !== null && section.path === ''
   }
 
   // Вызывается только когда isContentRoot(section) && section.route — см.
-  // renderSidebar. Флаг остаётся плоской ссылкой-страницей, без сворачивания.
+  // renderSidebar.
   function renderRootTitle (section) {
     var row = el('div', { class: 'db-nav-title-row' })
     row.appendChild(navToggleSpacer())
@@ -950,13 +954,16 @@
     var root = qs('#db-sidebar-tree')
     root.innerHTML = ''
     state.nav.forEach(function (section) {
-      // Плоский корень (главная страница раздела) отдельно тянет свой
-      // список детей — сворачивать нечего, это не папка. Иначе (обычный
-      // раздел без своей страницы, например «API Reference») — целиком
-      // через renderSectionTitle, он сам рисует и заголовок, и детей.
-      if (isContentRoot(section) && section.route) {
+      // Корень content-раздела отдельно тянет свой список детей — он не
+      // папка, сворачивать нечего. Если у него нет своей страницы
+      // (index.md), заголовок вообще не рисуем — только список детей, они
+      // и оказываются на самом верху сайдбара без фиктивной обёртки-папки.
+      // Иначе (обычная папка, и openapi-раздел «API Reference») — целиком
+      // через renderSectionTitle, он сам рисует и заголовок, и детей, со
+      // сворачиванием.
+      if (isContentRoot(section)) {
         var wrap = el('div', { class: 'db-nav-section' })
-        wrap.appendChild(renderRootTitle(section))
+        if (section.route) wrap.appendChild(renderRootTitle(section))
         wrap.appendChild(renderNavList(section.children))
         root.appendChild(wrap)
       } else {
@@ -988,7 +995,7 @@
     return ul
   }
 
-  // ---- переименование раздела/страницы (title в .navigation.yml / frontmatter)
+  // ---- переименование раздела/страницы (title в dockbook.config.json / frontmatter)
 
   var titleEditState = { kind: null, entry: null, path: null, route: null }
 

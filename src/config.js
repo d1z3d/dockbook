@@ -45,10 +45,16 @@ function loadConfig (configPath) {
     return { dir, base, label: item.label || null }
   })
 
-  config.openapi = (config.openapi || []).map(entry => ({
-    spec: path.resolve(root, entry.spec),
-    path: entry.path && entry.path.startsWith('/') ? entry.path : `/${entry.path || 'api'}`
-  }))
+  config.openapi = (config.openapi || [])
+    .map(entry => ({
+      spec: path.resolve(root, entry.spec),
+      path: entry.path && entry.path.startsWith('/') ? entry.path : `/${entry.path || 'api'}`
+    }))
+    .filter(entry => {
+      if (fs.existsSync(entry.spec)) return true
+      console.warn(`dockbook: openapi-спецификация не найдена, пропускаю: ${entry.spec}`)
+      return false
+    })
 
   return config
 }
